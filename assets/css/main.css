@@ -1,0 +1,249 @@
+@font-face {
+    font-family: 'lucida_grande';
+    src: url('fonts/lucida_grande_bold-webfont.eot');
+    src: url('fonts/lucida_grande_bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/lucida_grande_bold-webfont.woff2') format('woff2'),
+         url('fonts/lucida_grande_bold-webfont.woff') format('woff'),
+         url('fonts/lucida_grande_bold-webfont.ttf') format('truetype'),
+         url('fonts/lucida_grande_bold-webfont.svg#lucida_grandebold') format('svg');
+    font-weight: bold;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'lucida_grande';
+    src: url('fonts/6216-webfont.eot');
+    src: url('fonts/6216-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/6216-webfont.woff2') format('woff2'),
+         url('fonts/6216-webfont.woff') format('woff'),
+         url('fonts/6216-webfont.ttf') format('truetype'),
+         url('fonts/6216-webfont.svg#lucida_granderegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+body, html {
+	height: 100%;
+	max-height: 100%;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+#app-container {
+	height: 100%;
+	max-height: 100%;
+	background: #2d2d2d;
+	font-family: lucida_grande, serif;
+	overflow: hidden;
+}
+
+#app-statusbar-container {
+	width: 100%;
+	height: 21px;
+	border-bottom: 1px solid #141112;
+	background: #1e1e1e;
+	position: absolute;
+	bottom: 0px;
+	left: 0;
+	color: #747369;
+	font-size: 11px;
+	line-height: 23px;
+	overflow: hidden;
+}
+
+#status-transistors {
+	position: absolute;
+	left: 0;
+	top: 0;
+	padding-left: 4px;
+}
+
+#status-zoom {
+	position: absolute;
+	right: 70px;
+	top: 0;
+	width: 70px;
+}
+
+#status-mode {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 70px;
+}
+
+#app-inner-container {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 22px;
+	top: 0;
+}
+
+#app-inspector {
+	width: 240px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background: #262626;
+}
+
+#app-toolbox {
+	width: 240px;
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	background: #262626;
+}
+
+.toolset {
+	padding: 11px 8px;
+}
+
+.toolset h3 {
+	font-weight: bold;
+	font-size: 10px;
+	color: #515151;
+	text-transform: uppercase;
+	padding: 0;
+	margin: 0 0 8px;
+}
+
+#app-toolbox .toolset .button {
+	font-size: 11px;
+	color: #747369;
+	text-decoration: none;
+	display: inline-block;
+	border: 1px solid #4c4c4c;
+	border-radius: 3px;
+	padding: 2px 4px;
+	margin: 0 0 5px;
+}
+
+#app-toolbox .toolset .circuit-button {
+	border: 1px solid #4c4c4c;
+	border-radius: 3px;
+	text-decoration: none;
+	display: inline-block;
+	width: 40px;
+	height: 40px;
+}
+
+#app-toolbox .toolset .circuit-button img {
+	width: 100%;
+	height: 100%;
+	opacity: 0.6;
+}
+
+#app-working-area {
+	position: absolute;
+	left: 240px;
+	top: 0;
+	right: 240px;
+	bottom: 0;
+}
+
+#app-tab-container {
+	height: 28px;
+	width: 100%;
+	background: #1e1e1e;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#tab-nav-left {
+	width: 17px;
+	height: 28px;
+	background: url(../images/tab-nav-arrows.png) 0 0 no-repeat;
+	display: block;
+	float: left;
+}
+
+#tab-nav-right {
+	width: 17px;
+	height: 28px;
+	background: url(../images/tab-nav-arrows.png) -17px 0 no-repeat;
+	display: block;
+	float: left;
+}
+
+#tab-list {
+	height: 28px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	float: left;
+}
+
+#tab-list .label {
+	display: inline-block;
+	text-decoration: none;
+	line-height: 28px;
+	height: 28px;
+	color: #e8e6df;
+	font-size: 11px;
+}
+
+#tab-list li {
+	position: relative;
+	min-width: 90px;
+	padding: 0 30px 0 8px;
+}
+
+#tab-list .active {
+	background: #2d2d2d;
+}
+
+#tab-list .close {
+	background: url(../images/tab-close.png) 0 0;
+	width: 8px;
+	height: 8px;
+	position: absolute;
+	display: block;
+	right: 12px;
+	top: 11px;
+}
+
+#tab-list .unsaved .close {
+	background-position: -16px 0;
+}
+
+#tab-list .close:hover {
+	background-position: -8px 0;
+}
+
+#app-canvas {
+	position: absolute;
+	top: 28px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+#app-canvas canvas {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#app-canvas-grid {
+	z-index: 10;
+}
+
+#app-canvas-component {
+	z-index: 20;
+}
+
+#app-canvas-main {
+	z-index: 100;
+}

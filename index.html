@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Circuit Sandbox</title>
+
+	<link rel="stylesheet" href="assets/css/main.css">
+
+	<script src="assets/vendor/jquery-2.1.3.min.js"></script>
+</head>
+
+<body>
+	<div id="app-container">
+		<div id="app-inner-container">
+			<div id="app-toolbox">
+				<div id="toolbox-tools" class="toolset">
+					<h3>Tools</h3>
+
+					<a href="#" class="button" id="tool-wire">Wiring Tool</a><br>
+					<a href="#" class="button" id="tool-wire-tester">Wire Tester</a><br>
+				</div>
+
+				<div id="toolbox-chip-functions" class="toolset">
+					<h3>Chip Functions</h3>
+
+					<a href="#" class="button">Create New Chip</a><br>
+					<a href="#" class="button" id="tool-add-power-node">Add Power Node</a><br>
+					<a href="#" class="button" id="tool-add-ground-node">Add Ground Node</a><br>
+					<a href="#" class="button" id="tool-add-input-wire">Add Input Wire</a><br>
+					<a href="#" class="button" id="tool-add-output-wire">Add Output Wire</a><br>
+				</div>
+
+				<div id="toolbox-user-chips" class="toolset">
+					<h3>Input Devices</h3>
+
+					<a href="#" class="button">Binary Input Field</a><br>
+				</div>
+
+				<div id="toolbox-default-chips" class="toolset">
+					<h3>Default Circuits</h3>
+
+					<a href="#" class="circuit-button" id="tool-add-transistor"><img src="assets/images/circuits/transistor.png" alt=""></a>
+					<a href="#" class="circuit-button"><img src="assets/images/circuits/and.png" alt=""></a>
+					<a href="#" class="circuit-button"><img src="assets/images/circuits/or.png" alt=""></a>
+					<a href="#" class="circuit-button"><img src="assets/images/circuits/nand.png" alt=""></a>
+					<a href="#" class="circuit-button"><img src="assets/images/circuits/nor.png" alt=""></a>
+				</div>
+
+				<div id="toolbox-user-chips" class="toolset">
+					<h3>User Circuits</h3>
+				</div>
+
+				<div id="toolbox-debug" class="toolset">
+					<h3>Developer Tools</h3>
+
+					<a href="#" class="button" id="debug-log-components">Log Components</a><br>
+					<a href="#" class="button" id="debug-log-grid">Log Grid</a><br>
+					<a href="#" class="button" id="debug-clear-components">Clear Components</a><br>
+					<a href="#" class="button" id="debug-clear-canvases">Clear All Canvases</a><br>
+					<a href="#" class="button" id="debug-dirty-canvases">Dirty All Canvases</a><br>
+					<a href="#" class="button" id="debug-toggle-sim">Toggle Simulation</a><br>
+				</div>
+			</div>
+
+			<div id="app-working-area">
+				<div id="app-tab-container">
+					<a href="#" id="tab-nav-left"></a><a href="#" id="tab-nav-right"></a>
+					<ul id="tab-list">
+						<li class="main active unsaved"><a href="#" class="label">sandbox</a><a href="#" class="close"></a></li>
+					</ul>
+				</div>
+
+				<div id="app-canvas">
+					<canvas id="app-canvas-grid"></canvas>
+					<canvas id="app-canvas-component"></canvas>
+					<canvas id="app-canvas-sim"></canvas>
+					<canvas id="app-canvas-main"></canvas>
+				</div>
+			</div>
+
+			<div id="app-inspector">
+				<div class="toolset">
+					<h3>Inspector</h3>
+				</div>
+			</div>
+		</div>
+
+		<div id="app-statusbar-container">
+			<div id="status-transistors">0 transistors</div>
+			<div id="status-zoom">100%</div>
+			<div id="status-mode">Sandbox</div>
+		</div>
+	</div>
+
+	<script src="assets/js/main.js"></script>
+</body>
+
+</html>

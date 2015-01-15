@@ -55,46 +55,166 @@
 
     // Define components
     var Component = {};
+
     Component.PowerSource = function() {
 
     }
 
+    Component.Transistor = function(attributes) {
+        this.id          = attributes.id || 0;
+        this.type        = TYPE_TRANSISTOR;
+        this.dirty       = true;
+        this.x           = attributes.x;
+        this.y           = attributes.y;
+        this.placed      = attributes.placed === undefined ? true : attributes.place;
+        this.inputPin    = null;
+        this.outputPin   = null;
+        this.controlPin  = null;
+        this.connectable = true;
+
+        // Pins
+        this.pins = {
+            collector: {
+                connected_to: -1,
+                power_sources: 0,
+                label: 'Collector',
+                x: 0,
+                y: 0
+            },
+            emitter: {
+                connected_to: -1,
+                power_sources: 0,
+                label: 'Emitter',
+                x: 0,
+                y: 0
+            },
+            base: {
+                connected_to: -1,
+                power_sources: 0,
+                label: 'Base',
+                x: 0,
+                y: 0
+            }
+        };
+
+        // Is this component currently in a valid state (e.g. can it be placed)
+        this.valid = true;
+    }
+
+
+    Component.Transistor.prototype.serialize = function() {
+
+    }
+
     Component.Wire = function(attributes) {
-        this.id       = attributes.id || 0;
-        this.group_id = attributes.group_id || 0;
-        this.type     = TYPE_WIRE;
-        this.dirty    = true;
-        this.subtype  = attributes.subtype;
-        this.startX   = attributes.startX;
-        this.startY   = attributes.startY;
-        this.endX     = attributes.endX;
-        this.endY     = attributes.endY;
-        this.placed   = attributes.placed === undefined ? true : attributes.place;
-        this.pgid     = app.nextGroupId;
+        this.id          = attributes.id || -1;
+        this.type        = TYPE_WIRE;
+        this.dirty       = true;
+        this.subtype     = attributes.subtype;
+        this.startX      = attributes.startX;
+        this.startY      = attributes.startY;
+        this.endX        = attributes.endX;
+        this.endY        = attributes.endY;
+        this.placed      = attributes.placed === undefined ? true : attributes.place;
+        this.connectable = this.subtype === 'default';
+
+        // Pins
+        this.pins = {
+            start: {
+                connected_to: [],
+                power_sources: 0,
+                label: 'Start',
+                x: 0,
+                y: 0
+            },
+            end: {
+                connected_to: [],
+                power_sources: 0,
+                label: 'End',
+                x: 0,
+                y: 0
+            }
+        };
 
         // Is this component currently in a valid state (e.g. can it be placed)
         this.valid = this.startX != this.endX || this.startY != this.endY;
     }
 
+    Component.Wire.prototype.isPinPowered = function(type, id) {
+
+    }
+
+    Component.Wire.prototype.connectTo = function(componentId, x, y) {
+        console.log('Component.Wire.connectTo called, connecting ' + this.id + ' to ' + componentId)
+
+        for (pin in this.pins) {
+            if (this.pins[pin].x === x && this.pins[pin].y === y) {
+                this.pins[pin].connected_to.push(componentId);
+                return;
+            }
+        }
+
+        this.pins['pin_' + x + '_' + y] = {
+            connected_to: [componentId],
+            power_sources: 0,
+            label: 'Pin ' + x + 'x' + y,
+            x: x,
+            y: y
+        }
+    }
+
     Component.Wire.prototype.place = function() {
         console.log('Component.Wire.place called');
 
-        if (this.id) {
-            console.log(this.id);
+        if (this.id >= 0) {
             return false;
+        } else {
+            this.id = app.components.length;
         }
 
+        var startCompId = -1, endCompId = -1;
+
+        // Setup our pin coords
+        this.pins.start.x = this.startX;
+        this.pins.start.y = this.startY;
+        this.pins.end.x = this.endX;
+        this.pins.end.y = this.endY;
+
+            // Are we connected to another line via the start node?
+        if (app.hasGridComp(this.startX + '.' + this.startY, TYPE_HORIZONTAL_WIRE)) {
+            startCompId = app.grid[this.startX + '.' + this.startY][TYPE_HORIZONTAL_WIRE];
+        } else if (app.hasGridComp(this.startX + '.' + this.startY, TYPE_VERTICAL_WIRE)) {
+            startCompId = app.grid[this.startX + '.' + this.startY][TYPE_VERTICAL_WIRE];
+        } else if (app.hasGridComp(this.startX + '.' + this.startY, TYPE_WIRE_ENDPOINT)) {
+            startCompId = app.grid[this.startX + '.' + this.startY][TYPE_WIRE_ENDPOINT];
+        }
+
+        // Are we connected to another line via the end node?
+        if (app.hasGridComp(this.endX + '.' + this.endY, TYPE_HORIZONTAL_WIRE)) {
+            endCompId = app.grid[this.endX + '.' + this.endY][TYPE_HORIZONTAL_WIRE];
+        } else if (app.hasGridComp(this.endX + '.' + this.endY, TYPE_VERTICAL_WIRE)) {
+            endCompId = app.grid[this.endX + '.' + this.endY][TYPE_VERTICAL_WIRE];
+        } else if (app.hasGridComp(this.endX + '.' + this.endY, TYPE_WIRE_ENDPOINT)) {
+            endCompId = app.grid[this.endX + '.' + this.endY][TYPE_WIRE_ENDPOINT];
+        }
+
+        // Our start pin is connected to another wire
+        if (startCompId >= 0) {
+            this.pins.start.connected_to = [startCompId];
+            app.components[startCompId].connectTo(this.id, this.startX, this.startY);
+        }
+
+        // Our start pin is connected to another wire
+        if (endCompId >= 0) {
+            this.pins.start.connected_to = [endCompId];
+            app.components[endCompId].connectTo(this.id, this.endX, this.endY);
+        }
+
+        // Add to component array
         this.placed   = true;
-        this.id       = app.components.length;
-        this.group_id = this.pgid;
         this.dirty    = true;
-
-        if (this.pgid === app.nextGroupId) {
-            app.nextGroupId += 1;
-            this.pgid = 0;
-        }
-
         app.components.push(this);
+        this.unplacedComponent = null;
 
         // If we're an input wire, assign a letter (so the wire can be drawn as
         // "Input A" or "Input F", etc)
@@ -109,22 +229,18 @@
         var smallY = Math.min(this.startY, this.endY);
         var bigY   = Math.max(this.startY, this.endY);
 
+        // Add wire endpoints to the grid
+        app.addToGrid(this.startX, this.startY, TYPE_WIRE_ENDPOINT, this.id);
+        app.addToGrid(this.endX, this.endY, TYPE_WIRE_ENDPOINT, this.id);
+
         // Add wiring to the grid (horizontal)
         for (var i = smallX; i < bigX; i += app.actualSnap) {
-            if (app.grid[i + '.' + this.endY] == undefined) {
-                app.grid[i + '.' + this.endY] = {};
-            }
-
-            app.grid[i + '.' + this.endY][TYPE_HORIZONTAL_WIRE] = this.id;
+            app.addToGrid(i, this.endY, TYPE_HORIZONTAL_WIRE, this.id);
         }
 
         // Add wiring to the grid (vertical)
         for (var i = smallY; i < bigY; i += app.actualSnap) {
-            if (app.grid[this.startX + '.' + i] == undefined) {
-                app.grid[this.startX + '.' + i] = {};
-            }
-
-            app.grid[this.startX + '.' + i][TYPE_VERTICAL_WIRE] = this.id;
+            app.addToGrid(this.startX, i, TYPE_VERTICAL_WIRE, this.id);
         }
 
         return true;
@@ -273,7 +389,10 @@
             for (var j = smallY; j <= bigY; j += app.actualSnap) {
                 var idx = realWireStartX + '.' + j;
 
-                if (app.hasGridComp(idx, TYPE_VERTICAL_WIRE, this.id)) {
+                if (app.hasGridComp(idx, TYPE_VERTICAL_WIRE, this.id) && !app.hasGridComp(idx, TYPE_WIRE_ENDPOINT, this.id) && !app.hasGridComp(idx, TYPE_HORIZONTAL_WIRE, this.id)) {
+                    // The above if statement checks if we're in a block with a vertical wire that doesn't also have a
+                    // wire endpoint (e.g. its the end of a wire so we can connect to it) or a horizontal wire (its a c
+                    // corner)
                     this.valid = false;
                 } else if (j != smallY && j != bigY && app.grid[idx] && app.grid[idx][TYPE_HORIZONTAL_WIRE] !== undefined) {
                     // Clear that area
@@ -288,7 +407,6 @@
                     }
 
                     // Draw an arc
-                    console.log('drawing an arc');
                     context.moveTo(wireStartX - halfSnap, j);
                     context.arc(wireStartX, j, halfSnap, Math.PI, 0, false);
                     context.stroke();
@@ -299,7 +417,7 @@
                     if (!this.placed) {
                         app.toolState.replaceHorizontalWires.push({ x: wireStartX, y: j });
                     }
-                } else if (app.gridContainsAnythingExcept(idx, [TYPE_HORIZONTAL_WIRE], this.id)) {
+                } else if (app.gridContainsAnythingExcept(idx, [TYPE_HORIZONTAL_WIRE, TYPE_WIRE_ENDPOINT, TYPE_VERTICAL_WIRE], this.id)) {
                     this.valid = false;
                 }
             }
@@ -325,7 +443,13 @@
             for (var j = smallX; j <= bigX; j += app.actualSnap) {
                 idx = j + '.' + realWireEndY;
 
-                if (app.hasGridComp(idx, TYPE_HORIZONTAL_WIRE, this.id)) {
+                if (app.hasGridComp(idx, TYPE_HORIZONTAL_WIRE, this.id) &&
+                    !app.hasGridComp(idx, TYPE_WIRE_ENDPOINT, this.id) &&
+                    !app.hasGridComp(idx, TYPE_VERTICAL_WIRE, this.id) &&
+                    !app.hasGridComp(j + '.' + (realWireEndY - app.actualSnap), TYPE_VERTICAL_WIRE, this.id)) {
+                    // The above if statement checks if we're in a block with a horizontal wire that doesn't also have a
+                    // wire endpoint (e.g. its the end of a wire so we can connect to it) or a vertical wire (its a
+                    // corner)
                     this.valid = false;
                 } else if (j != smallX && j != bigX && app.grid[idx] && app.grid[idx][TYPE_VERTICAL_WIRE] !== undefined) {
                     context.lineTo(j - halfSnap, realWireEndY);
@@ -335,7 +459,7 @@
 
                     // Move cursor
                     context.moveTo(j + halfSnap, realWireEndY);
-                } else if (app.gridContainsAnythingExcept(idx, [TYPE_VERTICAL_WIRE], this.id)) {
+                } else if (app.gridContainsAnythingExcept(idx, [TYPE_HORIZONTAL_WIRE, TYPE_WIRE_ENDPOINT, TYPE_VERTICAL_WIRE], this.id)) {
                     this.valid = false;
                 }
             }
@@ -354,10 +478,6 @@
 
         if (this.placed) {
             color = '#575252';
-        }
-
-        if (app.simulate && id && app.poweredComponents[app.components[id].group_id]) {
-            color = '#0cff00';
         }
 
         if (!this.placed && !this.valid) {
@@ -397,51 +517,26 @@
             context.textAlign = 'left';
             context.fillText('In ' + app.input, realWireStartX + 5, realWireStartY + 10);
         }
-
-        // Add each wire block as a component
-        if (!this.placed) {
-            var startCompId = 0, endCompId = 0;
-
-            // Don't merge wires if we're placing input/output wires
-            if (!this.subtype || this.subtype === 'default') {
-                // Are we connected to another line via the start node?
-                if (app.grid[realWireStartX + '.' + realWireStartY] && app.grid[realWireStartX + '.' + realWireStartY][TYPE_HORIZONTAL_WIRE]) {
-                    startCompId = app.components[app.grid[realWireStartX + '.' + realWireStartY][TYPE_HORIZONTAL_WIRE]].group_id;
-                } else if (app.grid[realWireStartX + '.' + realWireStartY] && app.grid[realWireStartX + '.' + realWireStartY][TYPE_VERTICAL_WIRE]) {
-                    startCompId = app.components[app.grid[realWireStartX + '.' + realWireStartY][TYPE_VERTICAL_WIRE]].group_id;
-                } else if (app.grid[realWireStartX + '.' + realWireStartY] && app.grid[realWireStartX + '.' + realWireStartY][TYPE_WIRE_ENDPOINT]) {
-                    startCompId = app.components[app.grid[realWireStartX + '.' + realWireStartY][TYPE_WIRE_ENDPOINT]].group_id;
-                }
-
-                // Are we connected to another line via the end node?
-                if (app.grid[realWireEndX + '.' + realWireEndY] && app.grid[realWireEndX + '.' + realWireEndY][TYPE_HORIZONTAL_WIRE]) {
-                    endCompId = app.components[app.grid[realWireEndX + '.' + realWireEndY][TYPE_HORIZONTAL_WIRE]].group_id;
-                } else if (app.grid[realWireEndX + '.' + realWireEndY] && app.grid[realWireEndX + '.' + realWireEndY][TYPE_VERTICAL_WIRE]) {
-                    endCompId = app.components[app.grid[realWireEndX + '.' + realWireEndY][TYPE_VERTICAL_WIRE]].group_id;
-                } else if (app.grid[realWireEndX + '.' + realWireEndY] && app.grid[realWireEndX + '.' + realWireEndY][TYPE_WIRE_ENDPOINT]) {
-                    endCompId = app.components[app.grid[realWireEndX + '.' + realWireEndY][TYPE_WIRE_ENDPOINT]].group_id;
-                }
-
-                if (startCompId > 0 && endCompId > 0 && app.components[startCompId].type == 'wire' && app.components[startCompId].subtype == 'default' && app.components[endCompId].type == 'wire' && app.components[endCompId].subtype == 'default') {
-                    // Link all components
-                    for (id in app.components) {
-                        if (app.components[id] && app.components[id].group_id == endCompId) {
-                            app.components[id].group_id = startCompId;
-                        }
-                    }
-
-                    componentId = startCompId;
-                } else if (startCompId > 0 && app.components[startCompId].type == 'wire' && app.components[startCompId].subtype == 'default') {
-                    componentId = startCompId;
-                } else if (endCompId > 0 && app.components[endCompId].type == 'wire' && app.components[endCompId].subtype == 'default') {
-                    componentId = endCompId;
-                }
-            }
-        }
     }
 
     app.hasGridComp = function(gridIndex, type, componentId) {
-        return app.grid[gridIndex] && app.grid[gridIndex][type] !== undefined && app.grid[gridIndex][type] !== componentId;
+        if (typeof type === 'string') {
+            return app.grid[gridIndex] && app.grid[gridIndex][type] !== undefined && app.grid[gridIndex][type] !== componentId;
+        } else {
+            if (!app.grid[gridIndex]) {
+                return false;
+            }
+
+            for (atype in app.grid[gridIndex]) {
+                // Contains a component that wasn't in the exclude array and doesn't
+                // belong to the given component
+                if (type.indexOf(type) >= 0 && app.grid[gridIndex][atype] !== componentId) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
     app.gridContainsAnythingExcept = function(gridIndex, exclude, componentId) {
@@ -494,6 +589,24 @@
             }
         }, false);
 
+        app.canvas.main.addEventListener('mouseenter', function(evt) {
+            var rect = app.canvas.main.getBoundingClientRect();
+            var snap = app.actualSnap;
+            app.mouse.draw = true;
+
+            // Snap coordinates
+            var localX = evt.clientX - rect.left;
+            var localY = evt.clientY - rect.top;
+            var snapX = Math.round(localX / snap) * snap;
+            var snapY = Math.round(localY / snap) * snap;
+
+            if (app.mouse.x != snapX || app.mouse.y != snapY) {
+                app.mouse.x = snapX;
+                app.mouse.y = snapY;
+                app.dirty.main = true;
+            };
+        })
+
         app.canvas.main.addEventListener('mouseout', function(evt) {
             app.mouse.draw = false;
             app.dirty.main = true;
@@ -530,8 +643,7 @@
                     app.toolState.valid = false;
 
                     app.unplacedComponent = new Component.Wire({
-                        id: 0,
-                        group_id: 0,
+                        id: -1,
                         subtype: subtool,
                         startX: app.mouse.x,
                         startY: app.mouse.y,
@@ -700,18 +812,32 @@
             // Clear the canvas
             app.context.main.clearRect(0, 0, app.width, app.height);
 
-            // Draw mouse coords
-            if (app.mouse.draw) {
-                app.context.main.font = '10pt Calibri';
-                app.context.main.fillStyle = '#747369';
-                app.context.main.textAlign = 'right';
-                app.context.main.fillText(app.mouse.x + ', ' + app.mouse.y, app.width - 10, 15);
-            }
-
-            // Draw Tool
+            // Draw debug stuff
             app.context.main.font = '10pt Calibri';
             app.context.main.fillStyle = '#747369';
             app.context.main.textAlign = 'right';
+
+            if (app.mouse.draw) {
+                // Draw mouse coords
+                app.context.main.fillText(app.mouse.x + ', ' + app.mouse.y, app.width - 10, 15);
+
+                // Draw all components under our mouse
+                if (app.grid[app.mouse.x + '.' + app.mouse.y]) {
+                    var gridComponents = '';
+
+                    for (type in app.grid[app.mouse.x + '.' + app.mouse.y]) {
+                        if (gridComponents != '') {
+                            gridComponents += ', ';
+                        }
+
+                        gridComponents += type + '(' + app.grid[app.mouse.x + '.' + app.mouse.y][type] + ')'
+                    }
+
+                    app.context.main.fillText(gridComponents, app.width - 10, app.height - 24);
+                }
+            }
+
+            // Draw the current tool
             app.context.main.fillText(app.tool, app.width - 10, app.height - 10);
 
             // Draw the wire tool

@@ -170,7 +170,7 @@
     }
 
     Component.Wire.prototype.connectTo = function(componentId, x, y, notifiedBy) {
-        console.log('Component.Wire.connectTo called, connecting ' + this.id + ' to ' + componentId)
+        //console.log('Component.Wire.connectTo called, connecting ' + this.id + ' to ' + componentId)
 
         for (pin in this.pins) {
             if (this.pins[pin].x === x && this.pins[pin].y === y) {
@@ -181,7 +181,7 @@
 
         this.pins['pin_' + x + '_' + y] = {
             connected_to: [componentId],
-            power_sources: 0,
+            power_sources: [],
             label: 'Pin ' + x + 'x' + y,
             x: x,
             y: y
@@ -190,11 +190,11 @@
 
     Component.Wire.prototype.place = function() {
         if (this.id >= 0) {
-            console.log('Component.Wire.place called on already placed component');
+            //console.log('Component.Wire.place called on already placed component');
             return false;
         } else {
             this.id = app.components.length;
-            console.log('Component.Wire.place called for component ID#%d', this.id);
+            //console.log('Component.Wire.place called for component ID#%d', this.id);
         }
 
         // Important this goes first lol
@@ -228,7 +228,7 @@
 
         // Our start pin is connected to another wire
         if (startCompId !== null) {
-            this.pins.start.connected_to = startCompId.slice();
+            Array.prototype.push.apply(this.pins.start.connected_to, startCompId.slice());
 
             for (var i = 0; i < startCompId.length; i++) {
                 app.components[startCompId[i]].connectTo(this.id, this.startX, this.startY);
@@ -237,7 +237,7 @@
 
         // Our start pin is connected to another wire
         if (endCompId !== null) {
-            this.pins.start.connected_to = endCompId.slice();
+            Array.prototype.push.apply(this.pins.end.connected_to, endCompId.slice());
 
             for (var i = 0; i < endCompId.length; i++) {
                 if (endCompId[i] !== this.id) {
@@ -296,7 +296,7 @@
     }
 
     Component.Wire.prototype.draw = function() {
-        console.log('Component.Wire.draw called');
+        //console.log('Component.Wire.draw called');
 
         var context    = app.context.main;
         var wireStartX = this.startX;
@@ -411,9 +411,9 @@
         }
 
         // TODO: Remove the debug statements
-        //console.log('drawWire persisting: smallX: %d, bigX: %d, smallY: %d, bigY: %d', smallX, bigX, smallY, bigY);
-        //console.log('drawWire: wireStartX: %d, wireStartY: %d, wireEndX: %d, wireEndY: %d', wireStartX, wireStartY, wireEndX, wireEndY);
-        //console.log('X direction: %d, Y direction: %d', xDirection, yDirection);
+        ////console.log('drawWire persisting: smallX: %d, bigX: %d, smallY: %d, bigY: %d', smallX, bigX, smallY, bigY);
+        ////console.log('drawWire: wireStartX: %d, wireStartY: %d, wireEndX: %d, wireEndY: %d', wireStartX, wireStartY, wireEndX, wireEndY);
+        ////console.log('X direction: %d, Y direction: %d', xDirection, yDirection);
         context.beginPath();
 
         // Draw the wire vertically first
@@ -779,13 +779,13 @@
         $('#debug-log-components').on('click', function(e) {
             e.preventDefault();
 
-            console.log(app.components);
+            //console.log(app.components);
         });
 
         $('#debug-log-grid').on('click', function(e) {
             e.preventDefault();
 
-            console.log(app.grid);
+            //console.log(app.grid);
         });
 
         $('#debug-clear-components').on('click', function(e) {
@@ -983,7 +983,7 @@
                 app.components[id].state = 1;
                 connectedToPower = app.getComponentsConnectedToComponent(id);
 
-                console.log(connectedToPower);
+                //console.log(connectedToPower);
 
                 for (id in connectedToPower) {
                     app.components[id].state = 1;

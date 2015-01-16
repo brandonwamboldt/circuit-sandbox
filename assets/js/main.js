@@ -429,7 +429,7 @@
                     // wire endpoint (e.g. its the end of a wire so we can connect to it) or a horizontal wire (its a c
                     // corner)
                     this.valid = false;
-                } else if (j != smallY && j != bigY && app.grid[idx] && app.grid[idx][TYPE_HORIZONTAL_WIRE] !== undefined) {
+                } else if (j != smallY && j != bigY && app.grid[idx] && app.grid[idx][TYPE_HORIZONTAL_WIRE] !== undefined && app.grid[idx][TYPE_WIRE_ENDPOINT] === undefined) {
                     // Clear that area
                     app.context.component.clearRect(wireStartX - halfSnap, j - halfSnap, app.actualSnap, app.actualSnap);
 

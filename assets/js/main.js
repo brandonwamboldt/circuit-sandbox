@@ -286,24 +286,7 @@
     app.drawWireEndpoint = function(context, x, y, id, fill) {
         context.beginPath();
         context.arc(x, y, 2, 0, 2 * Math.PI, false);
-
-        var currentComponent = app.grid[x + '.' + y];
-
-        // Current wire endpoint is ON an existing wire so make it a solid color
-        if (currentComponent) {
-            if (currentComponent[app.TYPE_VERTICAL_WIRE] && currentComponent[app.TYPE_VERTICAL_WIRE][0] != id) {
-                context.fill();
-            } else if (currentComponent[app.TYPE_HORIZONTAL_WIRE] && currentComponent[app.TYPE_HORIZONTAL_WIRE][0] != id) {
-                context.fill();
-            } else if (currentComponent[app.TYPE_WIRE_ENDPOINT] && currentComponent[app.TYPE_WIRE_ENDPOINT][0] != id) {
-                context.fill();
-            }
-        }
-
-        if (fill) {
-            context.fill();
-        }
-
+        context.fill();
         context.stroke();
     }
 

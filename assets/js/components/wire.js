@@ -296,8 +296,6 @@
 
         // Instantiate some vars
         var halfSnap = App.actualSnap / 2;
-        var xDirection = 0; // 1 = right, -1 = left, 0 = none (equal)
-        var yDirection = 0; // 1 = down, -1 = up, 0 = none (equal)
         var componentId = App.nextGroupId;
 
         // Replace deleted horizontal lines
@@ -317,70 +315,13 @@
             this.redrawTemp.length = 0;
         }
 
-        // Save the original arguments
-        var realWireStartX = wireStartX;
-        var realWireStartY = wireStartY;
-        var realWireEndX = wireEndX;
-        var realWireEndY = wireEndY;
-
         // We don't really care about start vs end, we care about small vs large
-        var smallX = wireStartX;
-        var smallY = wireStartY;
-        var bigX = wireEndX;
-        var bigY = wireEndY;
+        var smallX = Math.min(wireStartX, wireEndX);
+        var smallY = Math.min(wireStartY, wireEndY);
+        var bigX = Math.max(wireStartX, wireEndX);
+        var bigY = Math.max(wireStartY, wireEndY);
 
-        if (wireStartX > wireEndX) {
-            smallX = wireEndX;
-            bigX = wireStartX;
-        }
-
-        if (wireStartY > wireEndY) {
-            smallY = wireEndY;
-            bigY = wireStartY;
-        }
-
-        // We don't really care about start vs end, we care about small vs large
-        if (wireStartX > wireEndX) {
-            smallX = wireEndX;
-            bigX = wireStartX;
-        }
-
-        if (wireStartY > wireEndY) {
-            smallY = wireEndY;
-            bigY = wireStartY;
-        }
-
-        // Calculate wire direction
-        if (wireEndY > wireStartY) {
-            // The start node is closer to the top
-            yDirection = 1;
-            wireStartY += 3;
-        } else if (wireStartY > wireEndY) {
-            // The end node is closer to the top
-            yDirection = -1;
-            wireStartY -= 3;
-        }
-
-        if (wireEndX > wireStartX) {
-            // The start node is closer to the left
-            xDirection = 1;
-            wireEndX -= 3;
-        } else if (wireStartX > wireEndX) {
-            // The end node is closer to the left
-            xDirection = -1;
-            wireEndX += 3;
-        }
-
-        // Straight vertical line
-        if (wireStartX === wireEndX) {
-            wireEndY += yDirection * -3;
-        }
-
-        // Straight horizontal line
-        if (wireStartY === wireEndY) {
-            wireStartX += xDirection * 3;
-        }
-
+        // Start drawing the wire
         context.beginPath();
 
         // Draw the wire vertically first
@@ -391,7 +332,7 @@
 
                 // Look for horizontal wires in our way and redraw them with a bridge
                 for (var j = smallY; j <= bigY; j += App.actualSnap) {
-                    var idx = realWireStartX + '.' + j;
+                    var idx = wireStartX + '.' + j;
 
                     if (App.hasGridComp(idx, App.TYPE_VERTICAL_WIRE, this.id) && !App.hasGridComp(idx, App.TYPE_WIRE_ENDPOINT, this.id) && !App.hasGridComp(idx, App.TYPE_HORIZONTAL_WIRE, this.id)) {
                         // The above if statement checks if we're in a block with a vertical wire that doesn't also have a
@@ -414,14 +355,14 @@
 
                             for (var type in App.grid[idx]) {
                                 for (var i in App.grid[idx][type]) {
-                                    App.components[App.grid[idx][type][i]].draw(true, realWireStartX, j);
+                                    App.components[App.grid[idx][type][i]].draw(true, wireStartX, j);
                                 }
                             }
 
                             // If we're not in persistent mode, we need to go back later
                             // and redraw the original horizontal line if we don't keep
                             // the current layout
-                            this.redrawTemp.push({ x: realWireStartX, y: j });
+                            this.redrawTemp.push({ x: wireStartX, y: j });
                         }
 
                         context.moveTo(wireStartX, j + 3 - (halfSnap * 0.85));
@@ -451,25 +392,25 @@
 
             if (this.startX > this.endX) {
                 // Wire goes right to left
-                idxR = (realWireStartX + App.actualSnap) + '.' + realWireEndY;
+                idxR = (wireStartX + App.actualSnap) + '.' + wireEndY;
             } else {
                 // Wire goes left to right
-                idxR = (realWireStartX - App.actualSnap) + '.' + realWireEndY;
+                idxR = (wireStartX - App.actualSnap) + '.' + wireEndY;
             }
 
             // Look for any wires running vertically along our horizontal path
             for (var j = smallX; j <= bigX; j += App.actualSnap) {
-                idx = j + '.' + realWireEndY;
+                idx = j + '.' + wireEndY;
 
                 if (App.hasGridComp(idx, App.TYPE_HORIZONTAL_WIRE, this.id) &&
                     !App.hasGridComp(idx, App.TYPE_WIRE_ENDPOINT, this.id) &&
                     !App.hasGridComp(idx, App.TYPE_VERTICAL_WIRE, this.id) &&
-                    !App.hasGridComp(j + '.' + (realWireEndY - App.actualSnap), App.TYPE_VERTICAL_WIRE, this.id)) {
+                    !App.hasGridComp(j + '.' + (wireEndY - App.actualSnap), App.TYPE_VERTICAL_WIRE, this.id)) {
                     // The above if statement checks if we're in a block with a horizontal wire that doesn't also have a
                     // wire endpoint (e.g. its the end of a wire so we can connect to it) or a vertical wire (its a
                     // corner)
                     this.valid = false;
-                } else if (j === realWireStartX && App.hasGridComp(idxR, App.TYPE_HORIZONTAL_WIRE, this.id)) {
+                } else if (j === wireStartX && App.hasGridComp(idxR, App.TYPE_HORIZONTAL_WIRE, this.id)) {
                     // This makes connected on a corner invalid
                     this.valid = false;
                 } else if (
@@ -479,31 +420,31 @@
                     App.grid[idx][App.TYPE_VERTICAL_WIRE] !== undefined &&
                     App.grid[idx][App.TYPE_WIRE_ENDPOINT] === undefined
                 ) {
-                    context.lineTo(j - (halfSnap * 0.85), realWireEndY);
+                    context.lineTo(j - (halfSnap * 0.85), wireEndY);
 
                     // Draw an arc
-                    context.arc(j, realWireEndY, halfSnap * 0.85, Math.PI, 0, false);
+                    context.arc(j, wireEndY, halfSnap * 0.85, Math.PI, 0, false);
 
                     // Move cursor
-                    context.moveTo(j + (halfSnap * 0.85), realWireEndY);
+                    context.moveTo(j + (halfSnap * 0.85), wireEndY);
                 } else if (
                     App.unplacedComponent &&
                     App.unplacedComponent.type === App.TYPE_WIRE &&
                     App.unplacedComponent.startX === j &&
                     (
-                        (App.unplacedComponent.startY < realWireEndY && App.unplacedComponent.endY > realWireEndY) ||
-                        (App.unplacedComponent.startY > realWireEndY && App.unplacedComponent.endY < realWireEndY)
+                        (App.unplacedComponent.startY < wireEndY && App.unplacedComponent.endY > wireEndY) ||
+                        (App.unplacedComponent.startY > wireEndY && App.unplacedComponent.endY < wireEndY)
                     )
                 ) {
-                    context.moveTo(j - halfSnap, realWireEndY);
-                    context.lineTo(j - (halfSnap * 0.85), realWireEndY);
+                    context.moveTo(j - halfSnap, wireEndY);
+                    context.lineTo(j - (halfSnap * 0.85), wireEndY);
 
                     // Draw an arc
-                    context.arc(j, realWireEndY, halfSnap * 0.85, Math.PI, 0, false);
+                    context.arc(j, wireEndY, halfSnap * 0.85, Math.PI, 0, false);
 
                     // Move cursor
-                    context.moveTo(j + (halfSnap * 0.85), realWireEndY);
-                    context.lineTo(j + halfSnap, realWireEndY);
+                    context.moveTo(j + (halfSnap * 0.85), wireEndY);
+                    context.lineTo(j + halfSnap, wireEndY);
 
                     // Don't redraw the proper line
                     pdFix = false;
@@ -515,9 +456,9 @@
             if (!partialDraw) {
                 // Finish drawing the wire
                 if (wireStartX > wireEndX) {
-                    context.lineTo(wireStartX, realWireEndY);
+                    context.lineTo(wireStartX, wireEndY);
                 } else {
-                    context.lineTo(wireEndX, realWireEndY);
+                    context.lineTo(wireEndX, wireEndY);
                 }
             } else if (pdFix) {
                 context.moveTo(pdX - halfSnap, pdY);
@@ -565,19 +506,19 @@
 
         // Draw the wiring endpoints
         if (!partialDraw) {
-            App.drawWireEndpoint(context, realWireStartX, realWireStartY, id);
-            App.drawWireEndpoint(context, realWireEndX, realWireEndY, id);
+            App.drawWireEndpoint(context, wireStartX, wireStartY, id);
+            App.drawWireEndpoint(context, wireEndX, wireEndY, id);
         }
 
         // Draw label
         if (subtype == 'output') {
             context.font = '10pt Calibri';
             context.textAlign = 'left';
-            context.fillText('Out', realWireStartX + 5, realWireStartY + 10);
+            context.fillText('Out', wireStartX + 5, wireStartY + 10);
         } else if (subtype === 'input') {
             context.font = '10pt Calibri';
             context.textAlign = 'left';
-            context.fillText('In ' + App.input, realWireStartX + 5, realWireStartY + 10);
+            context.fillText('In ' + App.input, wireStartX + 5, wireStartY + 10);
         }
 
         // No longer dirty

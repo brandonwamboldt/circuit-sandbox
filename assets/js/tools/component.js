@@ -12,6 +12,8 @@
             return App.Component.Wire;
         } else if (state.type === App.TYPE_POWER_SOURCE) {
             return App.Component.PowerSource;
+        } else if (state.type === App.TYPE_TRANSISTOR) {
+            return App.Component.Transistor;
         }
     }
 

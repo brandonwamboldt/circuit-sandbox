@@ -60,6 +60,20 @@
         }
     }
 
+    PowerSource.prototype.setXY = function(placed, x, y) {
+        if (x != this.x) {
+            this.x     = x;
+            this.dirty = true;
+            this.valid = true; // Be optimistic
+        }
+
+        if (y != this.y) {
+            this.y     = y;
+            this.dirty = true;
+            this.valid = true; // Be optimistic
+        }
+    }
+
     PowerSource.prototype.place = function() {
         if (this.id >= 0) {
             //console.log('PowerSource.place called on already placed component');
@@ -122,20 +136,6 @@
         App.addToGrid(this.x, this.y - App.actualSnap, App.TYPE_POWER_SOURCE, this.id);
 
         return true;
-    }
-
-    PowerSource.prototype.setXY = function(placed, x, y) {
-        if (x != this.x) {
-            this.x     = x;
-            this.dirty = true;
-            this.valid = true; // Be optimistic
-        }
-
-        if (y != this.y) {
-            this.y     = y;
-            this.dirty = true;
-            this.valid = true; // Be optimistic
-        }
     }
 
     PowerSource.prototype.draw = function() {

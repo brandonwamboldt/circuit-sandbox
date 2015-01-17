@@ -44,9 +44,7 @@
     $('#tool-add-transistor').on('click', function(e) {
         e.preventDefault();
 
-        App.lastTool = App.tool;
-        App.tool = 'builtin.add-transistor';
-        App.toolState = {valid: true};
+        App.switchTool('Component', { type: App.TYPE_TRANSISTOR });
     });
 
     $('#debug-log-components').on('click', function(e) {

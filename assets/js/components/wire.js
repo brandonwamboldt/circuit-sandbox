@@ -10,6 +10,7 @@
         this.endY        = attributes.endY;
         this.placed      = attributes.placed === undefined ? true : attributes.place;
         this.connectable = this.subtype === 'default';
+        this.drawNodes   = 2;
 
         // Pins
         this.pins = {
@@ -174,18 +175,52 @@
         return true;
     }
 
-    Wire.prototype.setEndXY = function(x, y) {
-        if (x != this.endX) {
-            this.endX = x;
-            this.dirty = true;
-            this.valid = true; // Be optimistic
+    Wire.prototype.setXY = function(placed, x, y) {
+        if (placed === 0) {
+            if (x != this.startX) {
+                this.startX = x;
+                this.endX   = x;
+                this.dirty  = true;
+                this.valid  = true; // Be optimistic
+            }
+
+            if (y != this.startY) {
+                this.startY = y;
+                this.endY   = y;
+                this.dirty  = true;
+                this.valid  = true; // Be optimistic
+            }
+        } else {
+            if (x != this.endX) {
+                this.endX  = x;
+                this.dirty = true;
+                this.valid = true; // Be optimistic
+            }
+
+            if (y != this.endY) {
+                this.endY  = y;
+                this.dirty = true;
+                this.valid = true; // Be optimistic
+            }
+        }
+    }
+
+    Wire.prototype.setStartXY = function(x, y) {
+        if (x != this.startX) {
+            this.startX = x;
+            this.dirty  = true;
+            this.valid  = true; // Be optimistic
         }
 
-        if (y != this.endY) {
-            this.endY = y;
-            this.dirty = true;
-            this.valid = true; // Be optimistic
+        if (y != this.startY) {
+            this.startY = y;
+            this.dirty  = true;
+            this.valid  = true; // Be optimistic
         }
+    }
+
+    Wire.prototype.setEndXY = function(x, y) {
+        this.setXY(1, x, y);
     }
 
     Wire.prototype.draw = function() {

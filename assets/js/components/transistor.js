@@ -10,6 +10,7 @@
         this.outputPin   = null;
         this.controlPin  = null;
         this.connectable = true;
+        this.drawNodes   = 1;
 
         // Pins
         this.pins = {

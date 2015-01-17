@@ -28,6 +28,8 @@
     var Tool = {};
     var toolState = {};
 
+    app.Component = Component;
+
     // Application state
     app.simulate = false;
     app.zoom = 1;
@@ -156,6 +158,10 @@
         });
 
         app.canvas.main.addEventListener('click', function(evt) {
+            Tool[app.tool].click(toolState, app.mouse.x, app.mouse.y);
+
+            return;
+
             if (app.tool === 'builtin.wire' || app.tool === 'builtin.wire.input' || app.tool === 'builtin.wire.output') {
                 var subtool = 'default';
 

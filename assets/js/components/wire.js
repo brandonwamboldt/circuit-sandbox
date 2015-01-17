@@ -11,6 +11,7 @@
         this.placed      = attributes.placed === undefined ? true : attributes.place;
         this.connectable = this.subtype === 'default';
         this.drawNodes   = 2;
+        this.redrawTemp  = [];
 
         // Pins
         this.pins = {
@@ -141,8 +142,9 @@
         }
 
         // Add to component array
-        this.placed   = true;
-        this.dirty    = true;
+        this.placed     = true;
+        this.dirty      = true;
+        this.redrawTemp = null;
         App.components.push(this);
 
         // If we're an input wire, assign a letter (so the wire can be drawn as
@@ -223,9 +225,13 @@
         this.setXY(1, x, y);
     }
 
-    Wire.prototype.draw = function() {
-        //console.log('Wire.draw called');
+    Wire.prototype.draw = function(partialDraw, pdX, pdY) {
+        //console.log('Wire.draw called (component id#%s', this.id);
 
+        // Defaults
+        partialDraw = partialDraw || false;
+
+        // Variable definitions
         var context    = App.context.main;
         var wireStartX = this.startX;
         var wireEndX   = this.endX;
@@ -233,14 +239,13 @@
         var wireEndY   = this.endY;
         var persistent = false;
         var id         = false;
+        var pdFix      = true;
+        var i, j, k, idx, type;
 
         // Determine the context to draw the component on
         if (this.placed) {
             context = App.context.component;
         }
-
-        // No longer dirty
-        this.dirty = false;
 
         // Instantiate some vars
         var halfSnap = App.actualSnap / 2;
@@ -249,30 +254,21 @@
         var componentId = App.nextGroupId;
 
         // Replace deleted horizontal lines
-        if (App.toolState.replaceHorizontalWires != undefined && !this.placed) {
-            App.context.component.strokeStyle = '#575252';
-            App.context.component.lineWidth = 2;
+        if (!this.placed && this.redrawTemp) {
+            for (i in this.redrawTemp) {
+                // Clear that area
+                App.context.component.clearRect(this.redrawTemp[i].x - halfSnap, this.redrawTemp[i].y - halfSnap, App.actualSnap, App.actualSnap);
+                idx = this.redrawTemp[i].x + '.' + this.redrawTemp[i].y;
 
-            for (index in App.toolState.replaceHorizontalWires) {
-                var c = App.toolState.replaceHorizontalWires[index];
-
-                App.context.component.beginPath();
-
-                if (App.components[App.grid[c.x + '.' + c.y][App.TYPE_HORIZONTAL_WIRE]].subtype == 'input') {
-                    App.context.component.strokeStyle = '#f600ff';
-                } else if (App.components[App.grid[c.x + '.' + c.y][App.TYPE_HORIZONTAL_WIRE]].subtype == 'output') {
-                    App.context.component.strokeStyle = '#00f0ff';
-                } else {
-                    App.context.component.strokeStyle = '#575252';
+                for (type in App.grid[idx]) {
+                    for (i in App.grid[idx][type]) {
+                        App.components[App.grid[idx][type][i]].draw(true, this.redrawTemp[i].x, this.redrawTemp[i].y);
+                    }
                 }
-
-                App.context.component.moveTo(c.x - App.actualSnap, c.y);
-                App.context.component.lineTo(c.x + App.actualSnap, c.y);
-                App.context.component.stroke();
             }
-        }
 
-        App.toolState.replaceHorizontalWires = [];
+            this.redrawTemp.length = 0;
+        }
 
         // Save the original arguments
         var realWireStartX = wireStartX;
@@ -338,58 +334,57 @@
             wireStartX += xDirection * 3;
         }
 
-        // TODO: Remove the debug statements
-        ////console.log('drawWire persisting: smallX: %d, bigX: %d, smallY: %d, bigY: %d', smallX, bigX, smallY, bigY);
-        ////console.log('drawWire: wireStartX: %d, wireStartY: %d, wireEndX: %d, wireEndY: %d', wireStartX, wireStartY, wireEndX, wireEndY);
-        ////console.log('X direction: %d, Y direction: %d', xDirection, yDirection);
         context.beginPath();
 
         // Draw the wire vertically first
-        if (wireStartY != wireEndY) {
-            context.strokeStyle = '#575252';
+        if (!partialDraw) {
+            if (wireStartY != wireEndY) {
+                context.strokeStyle = '#575252';
 
-            // Look for horizontal wires in our way and redraw them with a bridge
-            for (var j = smallY; j <= bigY; j += App.actualSnap) {
-                var idx = realWireStartX + '.' + j;
+                // Look for horizontal wires in our way and redraw them with a bridge
+                for (var j = smallY; j <= bigY; j += App.actualSnap) {
+                    var idx = realWireStartX + '.' + j;
 
-                if (App.hasGridComp(idx, App.TYPE_VERTICAL_WIRE, this.id) && !App.hasGridComp(idx, App.TYPE_WIRE_ENDPOINT, this.id) && !App.hasGridComp(idx, App.TYPE_HORIZONTAL_WIRE, this.id)) {
-                    // The above if statement checks if we're in a block with a vertical wire that doesn't also have a
-                    // wire endpoint (e.g. its the end of a wire so we can connect to it) or a horizontal wire (its a c
-                    // corner)
-                    this.valid = false;
-                } else if (j != smallY && j != bigY && App.grid[idx] && App.grid[idx][App.TYPE_HORIZONTAL_WIRE] !== undefined && App.grid[idx][App.TYPE_WIRE_ENDPOINT] === undefined) {
-                    // Clear that area
-                    App.context.component.clearRect(wireStartX - halfSnap, j - halfSnap, App.actualSnap, App.actualSnap);
+                    if (App.hasGridComp(idx, App.TYPE_VERTICAL_WIRE, this.id) && !App.hasGridComp(idx, App.TYPE_WIRE_ENDPOINT, this.id) && !App.hasGridComp(idx, App.TYPE_HORIZONTAL_WIRE, this.id)) {
+                        // The above if statement checks if we're in a block with a vertical wire that doesn't also have a
+                        // wire endpoint (e.g. its the end of a wire so we can connect to it) or a horizontal wire (its a c
+                        // corner)
+                        this.valid = false;
+                    } else if (
+                        j != smallY &&
+                        j != bigY &&
+                        App.grid[idx] &&
+                        App.grid[idx][App.TYPE_HORIZONTAL_WIRE] !== undefined &&
+                        App.grid[idx][App.TYPE_WIRE_ENDPOINT] === undefined
+                    ) {
 
-                    if (App.components[App.grid[idx][App.TYPE_HORIZONTAL_WIRE]].subtype == 'input') {
-                        context.strokeStyle = '#f600ff';
-                    } else if (App.components[App.grid[idx][App.TYPE_HORIZONTAL_WIRE]].subtype == 'output') {
-                        context.strokeStyle = '#00f0ff';
-                    } else if (context.strokeStyle != '#575252') {
-                        context.strokeStyle = '#575252';
+                        // Redraw every component on this square
+                        if (!this.placed) {
+                            // Clear that area
+                            App.context.component.clearRect(wireStartX - halfSnap, j - halfSnap, App.actualSnap, App.actualSnap);
+
+                            for (var type in App.grid[idx]) {
+                                for (var i in App.grid[idx][type]) {
+                                    App.components[App.grid[idx][type][i]].draw(true, realWireStartX, j);
+                                }
+                            }
+
+                            // If we're not in persistent mode, we need to go back later
+                            // and redraw the original horizontal line if we don't keep
+                            // the current layout
+                            this.redrawTemp.push({ x: realWireStartX, y: j });
+                        }
+                    } else if (App.gridContainsAnythingExcept(idx, [App.TYPE_HORIZONTAL_WIRE, App.TYPE_WIRE_ENDPOINT, App.TYPE_VERTICAL_WIRE], this.id)) {
+                        this.valid = false;
                     }
-
-                    // Draw an arc
-                    context.moveTo(wireStartX - halfSnap, j);
-                    context.arc(wireStartX, j, halfSnap, Math.PI, 0, false);
-                    context.stroke();
-
-                    // If we're not in persistent mode, we need to go back later
-                    // and redraw the original horizontal line if we don't keep
-                    // the current layout
-                    if (!this.placed) {
-                        App.toolState.replaceHorizontalWires.push({ x: wireStartX, y: j });
-                    }
-                } else if (App.gridContainsAnythingExcept(idx, [App.TYPE_HORIZONTAL_WIRE, App.TYPE_WIRE_ENDPOINT, App.TYPE_VERTICAL_WIRE], this.id)) {
-                    this.valid = false;
                 }
+
+                context.beginPath();
+
+                context.strokeStyle = color;
+                context.moveTo(wireStartX, wireStartY);
+                context.lineTo(wireStartX, wireEndY);
             }
-
-            context.beginPath();
-
-            context.strokeStyle = color;
-            context.moveTo(wireStartX, wireStartY);
-            context.lineTo(wireStartX, wireEndY);
         }
 
         // Draw the wire horizontally now
@@ -400,6 +395,11 @@
                 context.moveTo(wireEndX, wireEndY);
             } else {
                 context.moveTo(wireStartX, wireEndY);
+            }
+
+            if (partialDraw) {
+                smallX = pdX - App.actualSnap;
+                bigX = pdX + App.actualSnap;
             }
 
             // Look for any wires running vertically along our horizontal path
@@ -415,23 +415,49 @@
                     // corner)
                     this.valid = false;
                 } else if (j != smallX && j != bigX && App.grid[idx] && App.grid[idx][App.TYPE_VERTICAL_WIRE] !== undefined) {
-                    context.lineTo(j - halfSnap, realWireEndY);
+                    context.lineTo(j - (halfSnap * 0.85), realWireEndY);
 
                     // Draw an arc
-                    context.arc(j, realWireEndY, halfSnap, Math.PI, 0, false);
+                    context.arc(j, realWireEndY, halfSnap * 0.85, Math.PI, 0, false);
 
                     // Move cursor
-                    context.moveTo(j + halfSnap, realWireEndY);
+                    context.moveTo(j + (halfSnap * 0.85), realWireEndY);
+                } else if (
+                    App.unplacedComponent &&
+                    App.unplacedComponent.type === App.TYPE_WIRE &&
+                    App.unplacedComponent.startX === j &&
+                    (
+                        (App.unplacedComponent.startY < realWireEndY && App.unplacedComponent.endY > realWireEndY) ||
+                        (App.unplacedComponent.startY > realWireEndY && App.unplacedComponent.endY < realWireEndY)
+                    )
+                ) {
+                    context.moveTo(j - halfSnap, realWireEndY);
+                    context.lineTo(j - (halfSnap * 0.85), realWireEndY);
+
+                    // Draw an arc
+                    context.arc(j, realWireEndY, halfSnap * 0.85, Math.PI, 0, false);
+
+                    // Move cursor
+                    context.moveTo(j + (halfSnap * 0.85), realWireEndY);
+                    context.lineTo(j + halfSnap, realWireEndY);
+
+                    // Don't redraw the proper line
+                    pdFix = false;
                 } else if (App.gridContainsAnythingExcept(idx, [App.TYPE_HORIZONTAL_WIRE, App.TYPE_WIRE_ENDPOINT, App.TYPE_VERTICAL_WIRE], this.id)) {
                     this.valid = false;
                 }
             }
 
-            // Finish drawing the wire
-            if (wireStartX > wireEndX) {
-                context.lineTo(wireStartX, realWireEndY);
-            } else {
-                context.lineTo(wireEndX, realWireEndY);
+            if (!partialDraw) {
+                // Finish drawing the wire
+                if (wireStartX > wireEndX) {
+                    context.lineTo(wireStartX, realWireEndY);
+                } else {
+                    context.lineTo(wireEndX, realWireEndY);
+                }
+            } else if (pdFix) {
+                context.moveTo(pdX - halfSnap, pdY);
+                context.lineTo(pdX + halfSnap, pdY);
             }
         }
 
@@ -474,8 +500,10 @@
         context.stroke();
 
         // Draw the wiring endpoints
-        App.drawWireEndpoint(context, realWireStartX, realWireStartY, id);
-        App.drawWireEndpoint(context, realWireEndX, realWireEndY, id);
+        if (!partialDraw) {
+            App.drawWireEndpoint(context, realWireStartX, realWireStartY, id);
+            App.drawWireEndpoint(context, realWireEndX, realWireEndY, id);
+        }
 
         // Draw label
         if (subtype == 'output') {
@@ -487,6 +515,9 @@
             context.textAlign = 'left';
             context.fillText('In ' + App.input, realWireStartX + 5, realWireStartY + 10);
         }
+
+        // No longer dirty
+        this.dirty = false;
     }
 
     App.registerComponent('Wire', Wire);

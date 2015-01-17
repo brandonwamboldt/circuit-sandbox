@@ -39,10 +39,8 @@
     app.input = 'A';
 
     // Tooling
-    app.lastTool   = 'Component';
-    app.tool       = 'Component';
-    app.toolActive = false;
-    app.toolState  = {};
+    app.lastTool = 'Component';
+    app.tool     = 'Component';
 
     // Components
     app.grid        = {};

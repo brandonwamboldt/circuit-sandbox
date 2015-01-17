@@ -298,6 +298,7 @@
         '/Tools/Component',
         '/Tools/ComponentTester',
         '/UI/Temp',
-        '/Utils/Grid'
+        '/Utils/Grid',
+        '/Utils/Simulation'
     ], app.initCanvas);
 })(window.App = {});

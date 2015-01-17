@@ -58,7 +58,7 @@
     $('#debug-log-grid').on('click', function(e) {
         e.preventDefault();
 
-        //console.log(App.grid);
+        console.log(App.grid);
     });
 
     $('#debug-clear-components').on('click', function(e) {
@@ -93,11 +93,9 @@
         App.simulate = !App.simulate;
 
         if (App.simulate) {
-            App.tickSimulation();
+            App.startSimulation();
         } else {
-            for (id in App.components) {
-                App.components[id].state = 0;
-            }
+            App.stopSimulation();
         }
     });
 })();

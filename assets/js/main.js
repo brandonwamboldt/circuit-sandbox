@@ -127,6 +127,9 @@
         // Setup the canvas size
         app.resizeCanvas();
 
+        // Resize the canvas properly if the window is resized
+        window.addEventListener('resize', app.resizeCanvas, false);
+
         // Activate the default tool
         Tool[app.tool].activate(toolState, {});
 
@@ -201,8 +204,10 @@
             app.canvas[canvas].height = app.height;
         }
 
-        // Draw the grid background
-        app.drawGridBackgroundLayer(app.width, app.height);
+        // Mark everything as dirty
+        for (canvas in app.dirty) {
+            app.dirty[canvas] = true;
+        }
     }
 
     app.draw = function() {

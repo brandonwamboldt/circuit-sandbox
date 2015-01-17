@@ -190,12 +190,6 @@
             App.input = String.fromCharCode(App.input.charCodeAt(0) + 1);
         }
 
-        // Simplify for loops by ordering x,y coords
-        var smallX = Math.min(this.startX, this.endX);
-        var bigX   = Math.max(this.startX, this.endX);
-        var smallY = Math.min(this.startY, this.endY);
-        var bigY   = Math.max(this.startY, this.endY);
-
         // Add wire endpoints to the grid
         App.addToGrid(this.startX, this.startY, App.TYPE_WIRE_ENDPOINT, this.id);
         App.addToGrid(this.endX, this.endY, App.TYPE_WIRE_ENDPOINT, this.id);

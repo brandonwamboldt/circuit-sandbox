@@ -226,7 +226,7 @@
     }
 
     Wire.prototype.draw = function(partialDraw, pdX, pdY) {
-        //console.log('Wire.draw called (component id#%s', this.id);
+        console.log('Wire.draw called (component id#%s, dirty: %d)', this.id, this.dirty);
 
         // Defaults
         partialDraw = partialDraw || false;
@@ -339,7 +339,8 @@
         // Draw the wire vertically first
         if (!partialDraw) {
             if (wireStartY != wireEndY) {
-                context.strokeStyle = '#575252';
+                context.strokeStyle = color;
+                context.moveTo(wireStartX, smallY);
 
                 // Look for horizontal wires in our way and redraw them with a bridge
                 for (var j = smallY; j <= bigY; j += App.actualSnap) {
@@ -357,6 +358,8 @@
                         App.grid[idx][App.TYPE_HORIZONTAL_WIRE] !== undefined &&
                         App.grid[idx][App.TYPE_WIRE_ENDPOINT] === undefined
                     ) {
+                        context.lineTo(wireStartX, j - 1 - (halfSnap * 0.85));
+                        console.log('test');
 
                         // Redraw every component on this square
                         if (!this.placed) {
@@ -374,16 +377,14 @@
                             // the current layout
                             this.redrawTemp.push({ x: realWireStartX, y: j });
                         }
+
+                        context.moveTo(wireStartX, j + 3 - (halfSnap * 0.85));
                     } else if (App.gridContainsAnythingExcept(idx, [App.TYPE_HORIZONTAL_WIRE, App.TYPE_WIRE_ENDPOINT, App.TYPE_VERTICAL_WIRE], this.id)) {
                         this.valid = false;
                     }
                 }
 
-                context.beginPath();
-
-                context.strokeStyle = color;
-                context.moveTo(wireStartX, wireStartY);
-                context.lineTo(wireStartX, wireEndY);
+                context.lineTo(wireStartX, bigY);
             }
         }
 

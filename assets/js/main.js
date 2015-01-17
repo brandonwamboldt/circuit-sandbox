@@ -259,36 +259,6 @@
             if (app.mouse.draw) {
                 Tool[app.tool].draw(toolState, app.context.main, app.mouse.x, app.mouse.y);
             }
-
-            /*
-
-            if (app.mouse.draw && app.tool == 'builtin.wire-tester') {
-                if (app.mouse.x != app.toolState.oldX || app.mouse.y != app.toolState.oldY) {
-                    if (app.grid[app.toolState.oldX + '.' + app.toolState.oldY]) {
-                        // Remove power from every item on this grid square power
-                        for (type in app.grid[app.toolState.oldX + '.' + app.toolState.oldY]) {
-                            for (idx in app.grid[app.toolState.oldX + '.' + app.toolState.oldY][type]) {
-                                tempComponentId = app.grid[app.toolState.oldX + '.' + app.toolState.oldY][type][idx];
-                                app.components[tempComponentId].isReceivingPower(false, app.toolState.oldX, app.toolState.oldY, -1);
-                            }
-                        }
-                    }
-                }
-
-                if (app.grid[app.mouse.x + '.' + app.mouse.y]) {
-                    // Give every item on this grid square power
-                    for (type in app.grid[app.mouse.x + '.' + app.mouse.y]) {
-                        for (idx in app.grid[app.mouse.x + '.' + app.mouse.y][type]) {
-                            tempComponentId = app.grid[app.mouse.x + '.' + app.mouse.y][type][idx];
-                            app.components[tempComponentId].isReceivingPower(true, app.mouse.x, app.mouse.y, -1);
-                        }
-                    }
-                }
-
-                app.toolState.oldX = app.mouse.x;
-                app.toolState.oldY = app.mouse.y;
-            }
-            */
         }
 
         if (app.dirty.component) {

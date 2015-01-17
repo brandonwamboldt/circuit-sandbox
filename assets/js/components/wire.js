@@ -442,6 +442,13 @@
             }
         }
 
+        // Quick check if we're in placement mode
+        if (wireStartY === wireEndY && wireStartX === wireEndX) {
+            if (App.gridContainsAnythingExcept(wireStartX + '.' + wireStartY, [App.TYPE_HORIZONTAL_WIRE, App.TYPE_WIRE_ENDPOINT, App.TYPE_VERTICAL_WIRE], this.id)) {
+                this.valid = false;
+            }
+        }
+
         // Wire color
         var color = 'white';
         var subtype = 'default';

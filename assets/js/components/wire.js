@@ -243,24 +243,6 @@
         }
     }
 
-    Wire.prototype.setStartXY = function(x, y) {
-        if (x != this.startX) {
-            this.startX = x;
-            this.dirty  = true;
-            this.valid  = true; // Be optimistic
-        }
-
-        if (y != this.startY) {
-            this.startY = y;
-            this.dirty  = true;
-            this.valid  = true; // Be optimistic
-        }
-    }
-
-    Wire.prototype.setEndXY = function(x, y) {
-        this.setXY(1, x, y);
-    }
-
     /**
      * Here be dragons....
      *

@@ -70,7 +70,7 @@
             name = name.replace(/([a-z])([A-Z])/g, '$1-$2');
 
             script = document.createElement('script');
-            script.src = 'assets/js/' + name.toLowerCase() + '.js';
+            script.src = 'assets/js' + name.toLowerCase() + '.js';
 
             script.onload = function() {
                 loadCounter--;
@@ -81,7 +81,7 @@
             };
 
             document.head.appendChild(script);
-            console.log('Loading ' + script.src);
+            console.log('Loading module %s via %s', moduleNames[i], script.src);
         }
     }
 
@@ -486,9 +486,10 @@
 
     // Load external components
     app.loadModules([
-        'Components/PowerSource',
-        'Components/Transistor',
-        'Components/Wire',
-        'Utils/Grid'
+        '/Components/PowerSource',
+        '/Components/Transistor',
+        '/Components/Wire',
+        '/Tools/Component',
+        '/Utils/Grid'
     ], app.initCanvas);
 })(window.App = {});

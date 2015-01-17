@@ -95,13 +95,19 @@
         // Important this goes first lol
         App.unplacedComponent = null;
 
-        var startCompId = null, endCompId = null;
+        var startCompId = null, endCompId = null, compIds = null;
 
         // Setup our pin coords
         this.pins.start.x = this.startX;
         this.pins.start.y = this.startY;
         this.pins.end.x = this.endX;
         this.pins.end.y = this.endY;
+
+        // For nice for loops
+        var smallX = Math.min(this.startX, this.endX);
+        var bigX   = Math.max(this.startX, this.endX);
+        var smallY = Math.min(this.startY, this.endY);
+        var bigY   = Math.max(this.startY, this.endY);
 
         // Are we connected to another line via the start node?
         if (App.hasGridComp(this.startX + '.' + this.startY, App.TYPE_WIRE_ENDPOINT)) {
@@ -137,6 +143,36 @@
             for (var i = 0; i < endCompId.length; i++) {
                 if (endCompId[i] !== this.id) {
                     App.components[endCompId[i]].connectTo(this.id, this.endX, this.endY);
+                }
+            }
+        }
+
+        // Connect to components that we overlapped the endpoints (vertically)
+        for (var i = smallY; i < bigY; i += App.actualSnap) {
+
+            if (App.hasGridComp(this.startX + '.' + i, App.TYPE_WIRE_ENDPOINT)) {
+                compIds = App.grid[this.startX + '.' + i][App.TYPE_WIRE_ENDPOINT];
+
+                for (var j = 0; j < compIds.length; j++) {
+                    if (compIds[j] !== this.id) {
+                        this.connectTo(compIds[j], this.startX, i);
+                        App.components[compIds[j]].connectTo(this.id, this.startX, i);
+                    }
+                }
+            }
+        }
+
+        // Connect to components that we overlapped the endpoints (horizontally)
+        for (var i = smallX; i < bigX; i += App.actualSnap) {
+            if (App.hasGridComp(i + '.' + this.endY, App.TYPE_WIRE_ENDPOINT)) {
+                compIds = App.grid[i + '.' + this.endY][App.TYPE_WIRE_ENDPOINT];
+                Array.prototype.push.apply(this.pins.end.connected_to, compIds.slice());
+
+                for (var j = 0; j < compIds.length; j++) {
+                    if (compIds[j] !== this.id) {
+                        this.connectTo(compIds[j], i, this.endY);
+                        App.components[compIds[j]].connectTo(this.id, i, this.endY);
+                    }
                 }
             }
         }
@@ -359,7 +395,6 @@
                         App.grid[idx][App.TYPE_WIRE_ENDPOINT] === undefined
                     ) {
                         context.lineTo(wireStartX, j - 1 - (halfSnap * 0.85));
-                        console.log('test');
 
                         // Redraw every component on this square
                         if (!this.placed) {
@@ -415,7 +450,13 @@
                     // wire endpoint (e.g. its the end of a wire so we can connect to it) or a vertical wire (its a
                     // corner)
                     this.valid = false;
-                } else if (j != smallX && j != bigX && App.grid[idx] && App.grid[idx][App.TYPE_VERTICAL_WIRE] !== undefined) {
+                } else if (
+                    j != smallX &&
+                    j != bigX &&
+                    App.grid[idx] &&
+                    App.grid[idx][App.TYPE_VERTICAL_WIRE] !== undefined &&
+                    App.grid[idx][App.TYPE_WIRE_ENDPOINT] === undefined
+                ) {
                     context.lineTo(j - (halfSnap * 0.85), realWireEndY);
 
                     // Draw an arc

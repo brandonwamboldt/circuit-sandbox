@@ -2,16 +2,13 @@
     $('#tool-wire').on('click', function(e) {
         e.preventDefault();
 
-        App.lastTool = App.tool;
-        App.tool = 'builtin.wire';
+        App.switchTool('Component', { type: App.TYPE_WIRE });
     });
 
     $('#tool-wire-tester').on('click', function(e) {
         e.preventDefault();
 
-        App.lastTool = App.tool;
-        App.tool = 'builtin.wire-tester';
-        App.toolState = { oldX: -1, oldY: 0 };
+        App.switchTool('ComponentTester', {});
     });
 
     $('#tool-add-power-node').on('click', function(e) {

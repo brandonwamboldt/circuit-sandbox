@@ -72,6 +72,21 @@
         console.log('Tool registered: %s', name)
     }
 
+    app.switchTool = function(newTool, options) {
+        console.log('Switch tools to ' + newTool)
+        options = options || {};
+
+        // Deactivate current tool
+        Tool[app.tool].deactivate(toolState);
+
+        // Setup new tool state
+        toolState = {};
+
+        // Activate new tool
+        Tool[newTool].activate(toolState, options);
+        app.tool = newTool;
+    }
+
     //
     app.loadModules = function(moduleNames, cb) {
         var loadCounter = moduleNames.length;
@@ -158,6 +173,9 @@
         });
 
         app.canvas.main.addEventListener('click', function(evt) {
+            evt.preventDefault();
+            App.dirty.main = true;
+
             Tool[app.tool].click(toolState, app.mouse.x, app.mouse.y);
         });
 
@@ -169,7 +187,7 @@
         });
 
         // Main game loop
-        setInterval(app.drawFrame, 20);
+        setInterval(app.draw, 20);
     }
 
     app.resizeCanvas = function() {
@@ -187,7 +205,7 @@
         app.drawGridBackgroundLayer(app.width, app.height);
     }
 
-    app.drawFrame = function() {
+    app.draw = function() {
         var tempComponentId;
 
         // Should only get dirty via dev tools
@@ -239,31 +257,7 @@
 
             /*
 
-            if (app.mouse.draw && (app.tool === 'builtin.wire' || app.tool === 'builtin.wire.input' || app.tool === 'builtin.wire.output')) {
-                if (app.toolState.startX != app.mouse.x || app.toolState.startY != app.mouse.y) {
-                    app.toolState.valid = true;
-                } else {
-                    app.toolState.valid = false;
-                }
-
-                var subtool = 'default';
-
-                if (app.tool == 'builtin.wire.input') {
-                    subtool = 'input';
-                } else if (app.tool == 'builtin.wire.output') {
-                    subtool = 'output';
-                }
-
-                if (app.toolActive) {
-                    // Draw the wire
-                    app.unplacedComponent.setEndXY(app.mouse.x, app.mouse.y);
-                } else {
-                    app.context.main.strokeStyle = 'white';
-                    app.context.main.fillStyle = 'white';
-                    app.context.main.lineWidth = 2;
-                    app.drawWireEndpoint(app.context.main, app.mouse.x, app.mouse.y);
-                }
-            } else if (app.mouse.draw && app.tool == 'builtin.wire-tester') {
+            if (app.mouse.draw && app.tool == 'builtin.wire-tester') {
                 if (app.mouse.x != app.toolState.oldX || app.mouse.y != app.toolState.oldY) {
                     if (app.grid[app.toolState.oldX + '.' + app.toolState.oldY]) {
                         // Remove power from every item on this grid square power
@@ -288,14 +282,7 @@
 
                 app.toolState.oldX = app.mouse.x;
                 app.toolState.oldY = app.mouse.y;
-            } else if (app.mouse.draw && app.tool == 'builtin.add-power-node') {
-                app.drawPowerNode(app.context.main, 'default', app.mouse.x, app.mouse.y);
-            } else if (app.mouse.draw && app.tool == 'builtin.add-ground-node') {
-                app.drawGroundNode(app.context.main, 'default', app.mouse.x, app.mouse.y);
-            } else if (app.mouse.draw && app.tool == 'builtin.add-transistor') {
-                app.drawTransistor(app.context.main, 'tool', app.mouse.x, app.mouse.y);
             }
-
             */
         }
 
@@ -353,6 +340,7 @@
         '/Components/Transistor',
         '/Components/Wire',
         '/Tools/Component',
+        '/Tools/ComponentTester',
         '/UI/Temp',
         '/Utils/Grid'
     ], app.initCanvas);

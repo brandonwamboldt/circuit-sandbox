@@ -32,7 +32,7 @@
         };
 
         // Is this component currently in a valid state (e.g. can it be placed)
-        this.valid = this.startX != this.endX || this.startY != this.endY;
+        this.valid = true;
     }
 
     Wire.prototype.isReceivingPower = function(receivingPower, x, y, sourceId, notifiedBy) {

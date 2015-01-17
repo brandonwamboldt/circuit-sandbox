@@ -482,8 +482,8 @@
 
         // Draw the wiring endpoints
         if (!partialDraw) {
-            App.drawWireEndpoint(context, wireStartX, wireStartY, id);
-            App.drawWireEndpoint(context, wireEndX, wireEndY, id);
+            App.drawWireEndpoint(context, wireStartX, wireStartY);
+            App.drawWireEndpoint(context, wireEndX, wireEndY);
         }
 
         // Draw label

@@ -283,7 +283,7 @@
         }
     }
 
-    app.drawWireEndpoint = function(context, x, y, id, fill) {
+    app.drawWireEndpoint = function(context, x, y) {
         context.beginPath();
         context.arc(x, y, 2, 0, 2 * Math.PI, false);
         context.fill();

@@ -244,6 +244,13 @@
     app.drawFrame = function() {
         var tempComponentId;
 
+        // Should only get dirty via dev tools
+        if (app.dirty.grid) {
+            app.dirty.grid = false;
+
+            app.drawGridBackgroundLayer(app.width, app.height);
+        }
+
         // Only redraw if the canvas is dirty (e.g. needs to draw something new)
         if (app.dirty.main) {
             app.dirty.main = false;
@@ -277,7 +284,7 @@
             }
 
             // Draw the current tool
-            app.context.main.fillText(app.tool, app.width - 10, app.height - 10);
+            app.context.main.fillText(Tool[app.tool].label(toolState), app.width - 10, app.height - 10);
 
             // Draw the wire tool
             if (app.mouse.draw) {
@@ -342,12 +349,6 @@
             } else if (app.mouse.draw && app.tool == 'builtin.add-transistor') {
                 app.drawTransistor(app.context.main, 'tool', app.mouse.x, app.mouse.y);
             }
-        }
-
-        if (app.dirty.grid) {
-            app.dirty.grid = false;
-
-            app.drawGridBackgroundLayer(app.width, app.height);
         }
 
         if (app.dirty.component) {

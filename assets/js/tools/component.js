@@ -3,6 +3,10 @@
 
     }
 
+    ComponentTool.label = function(state) {
+    	return 'Component.' + state.type;
+    }
+
     ComponentTool.activate = function(state, options) {
     	state.active  = false;
     	state.startX  = 0;

@@ -175,14 +175,14 @@
 
         app.canvas.main.addEventListener('click', function(evt) {
             evt.preventDefault();
-            App.dirty.main = true;
+            app.dirty.main = true;
 
             Tool[app.tool].click(toolState, app.mouse.x, app.mouse.y);
         });
 
         app.canvas.main.addEventListener('contextmenu', function(evt) {
             evt.preventDefault();
-            App.dirty.main = true;
+            app.dirty.main = true;
 
             Tool[app.tool].contextmenu(toolState, app.mouse.x, app.mouse.y);
         });

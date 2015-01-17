@@ -240,6 +240,12 @@
                 this.dirty = true;
                 this.valid = true; // Be optimistic
             }
+
+            if (this.startX === this.endX && this.startY === this.endY) {
+                this.valid = false;
+            } else {
+                this.valid = true;
+            }
         }
     }
 

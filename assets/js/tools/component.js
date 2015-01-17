@@ -48,6 +48,8 @@
             state.placed = 0;
         }
 
+        App.unplacedComponent.dirty = true;
+
         if (App.unplacedComponent.drawNodes === state.placed) {
             App.unplacedComponent.place();
             state.placed = 0;

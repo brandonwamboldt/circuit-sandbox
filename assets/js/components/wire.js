@@ -261,6 +261,11 @@
         this.setXY(1, x, y);
     }
 
+    /**
+     * Here be dragons....
+     *
+     * TODO: Oh for the love of god refactor this
+     */
     Wire.prototype.draw = function(partialDraw, pdX, pdY) {
         //console.log('Wire.draw called (component id#%s, dirty: %d)', this.id, this.dirty);
 
@@ -438,6 +443,14 @@
                 bigX = pdX + App.actualSnap;
             }
 
+            if (this.startX > this.endX) {
+                // Wire goes right to left
+                idxR = (realWireStartX + App.actualSnap) + '.' + realWireEndY;
+            } else {
+                // Wire goes left to right
+                idxR = (realWireStartX - App.actualSnap) + '.' + realWireEndY;
+            }
+
             // Look for any wires running vertically along our horizontal path
             for (var j = smallX; j <= bigX; j += App.actualSnap) {
                 idx = j + '.' + realWireEndY;
@@ -449,6 +462,9 @@
                     // The above if statement checks if we're in a block with a horizontal wire that doesn't also have a
                     // wire endpoint (e.g. its the end of a wire so we can connect to it) or a vertical wire (its a
                     // corner)
+                    this.valid = false;
+                } else if (j === realWireStartX && App.hasGridComp(idxR, App.TYPE_HORIZONTAL_WIRE, this.id)) {
+                    // This makes connected on a corner invalid
                     this.valid = false;
                 } else if (
                     j != smallX &&

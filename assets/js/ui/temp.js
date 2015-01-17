@@ -14,9 +14,7 @@
     $('#tool-add-power-node').on('click', function(e) {
         e.preventDefault();
 
-        App.lastTool = App.tool;
-        App.tool = 'builtin.add-power-node';
-        App.toolState = {valid: true};
+        App.switchTool('Component', { type: App.TYPE_POWER_SOURCE });
     });
 
     $('#tool-add-ground-node').on('click', function(e) {

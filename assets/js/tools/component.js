@@ -10,6 +10,8 @@
     ComponentTool.getComponent = function(state) {
         if (state.type === App.TYPE_WIRE) {
             return App.Component.Wire;
+        } else if (state.type === App.TYPE_POWER_SOURCE) {
+            return App.Component.PowerSource;
         }
     }
 

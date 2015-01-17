@@ -35,6 +35,22 @@
         return false;
     }
 
+    app.gridContainsAnything = function(x, y, componentId) {
+        if (!app.grid[x + '.' + y]) {
+            return false;
+        }
+
+        for (type in app.grid[x + '.' + y]) {
+            // Contains a component that wasn't in the exclude array and doesn't
+            // belong to the given component
+            if (app.grid[x + '.' + y][type].indexOf(componentId) === -1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     app.drawGridBackgroundLayer = function(width, height) {
         app.context.grid.beginPath();
 

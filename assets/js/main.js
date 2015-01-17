@@ -159,73 +159,13 @@
 
         app.canvas.main.addEventListener('click', function(evt) {
             Tool[app.tool].click(toolState, app.mouse.x, app.mouse.y);
+        });
 
-            return;
+        app.canvas.main.addEventListener('contextmenu', function(evt) {
+            evt.preventDefault();
+            App.dirty.main = true;
 
-            if (app.tool === 'builtin.wire' || app.tool === 'builtin.wire.input' || app.tool === 'builtin.wire.output') {
-                var subtool = 'default';
-
-                if (app.tool == 'builtin.wire.input') {
-                    subtool = 'input';
-                } else if (app.tool == 'builtin.wire.output') {
-                    subtool = 'output';
-                }
-
-                if (app.toolActive) {
-                    app.toolActive = false;
-                    app.dirty.main = true;
-
-                    if (app.unplacedComponent.valid) {
-                        app.unplacedComponent.place();
-                    }
-
-                    if (subtool != 'default') {
-                        app.tool = app.lastTool;
-                        app.lastTool = 'builtin.wire.' + subtool;
-                    }
-
-                    app.toolState = {};
-                } else {
-                    app.toolActive = true;
-                    app.toolState.startX = app.mouse.x;
-                    app.toolState.startY = app.mouse.y;
-                    app.toolState.valid = false;
-
-                    app.unplacedComponent = new Component.Wire({
-                        id: -1,
-                        subtype: subtool,
-                        startX: app.mouse.x,
-                        startY: app.mouse.y,
-                        endX: app.mouse.x,
-                        endY: app.mouse.y,
-                        placed: false
-                    })
-                }
-            } else if (app.tool == 'builtin.add-power-node') {
-                app.tool = app.lastTool;
-                app.lastTool = 'builtin.add-power-node';
-                app.dirty.main = true;
-
-                if (app.toolState.valid) {
-                    app.drawPowerNode(app.context.component, 'default', app.mouse.x, app.mouse.y, true);
-                }
-            } else if (app.tool == 'builtin.add-ground-node') {
-                app.tool = app.lastTool;
-                app.lastTool = 'builtin.add-ground-node';
-                app.dirty.main = true;
-
-                if (app.toolState.valid) {
-                    app.drawGroundNode(app.context.component, 'default', app.mouse.x, app.mouse.y, true);
-                }
-            } else if (app.tool == 'builtin.add-transistor') {
-                app.tool = app.lastTool;
-                app.lastTool = 'builtin.add-transistor';
-                app.dirty.main = true;
-
-                if (app.toolState.valid) {
-                    app.drawTransistor(app.context.component, 'default', app.mouse.x, app.mouse.y, true);
-                }
-            }
+            Tool[app.tool].contextmenu(toolState, app.mouse.x, app.mouse.y);
         });
 
         // Main game loop
@@ -292,12 +232,12 @@
             // Draw the current tool
             app.context.main.fillText(Tool[app.tool].label(toolState), app.width - 10, app.height - 10);
 
-            // Draw the wire tool
+            // Draw the current tool
             if (app.mouse.draw) {
                 Tool[app.tool].draw(toolState, app.context.main, app.mouse.x, app.mouse.y);
             }
 
-            return;
+            /*
 
             if (app.mouse.draw && (app.tool === 'builtin.wire' || app.tool === 'builtin.wire.input' || app.tool === 'builtin.wire.output')) {
                 if (app.toolState.startX != app.mouse.x || app.toolState.startY != app.mouse.y) {
@@ -355,6 +295,8 @@
             } else if (app.mouse.draw && app.tool == 'builtin.add-transistor') {
                 app.drawTransistor(app.context.main, 'tool', app.mouse.x, app.mouse.y);
             }
+
+            */
         }
 
         if (app.dirty.component) {
@@ -368,14 +310,16 @@
         }
 
         // Go through each component to find dirty ones and allow them to redraw
-        for (component in app.components) {
-            if (component.dirty) {
-                component.draw();
+        for (var idx in app.components) {
+            if (app.components[idx].dirty) {
+                app.components[idx].draw();
             }
         }
 
-        if (app.unplacedComponent !== null && app.unplacedComponent.dirty) {
-            app.unplacedComponent.draw();
+        if (app.mouse.draw) {
+            if (app.unplacedComponent !== null && app.unplacedComponent.dirty) {
+                app.unplacedComponent.draw();
+            }
         }
     }
 

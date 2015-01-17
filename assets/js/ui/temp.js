@@ -57,7 +57,7 @@
     $('#debug-log-components').on('click', function(e) {
         e.preventDefault();
 
-        //console.log(App.components);
+        console.log(App.components);
     });
 
     $('#debug-log-grid').on('click', function(e) {

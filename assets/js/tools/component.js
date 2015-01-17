@@ -15,9 +15,7 @@
 
     ComponentTool.activate = function(state, options) {
         console.log('Tool.ComponentTool activated');
-        state.active  = false;
-        state.startX  = 0;
-        state.startY  = 0;
+
         state.type    = options.type || App.TYPE_WIRE;
         state.subtype = options.subtype || 'default';
         state.placed  = 0;
@@ -36,34 +34,43 @@
     }
 
     ComponentTool.deactivate = function(state) {
+        console.log('Tool.ComponentTool deactivated');
+
         App.unplacedComponent = null;
     }
 
     ComponentTool.click = function(state, x, y) {
-        if (state.active) {
+        console.log('Tool.ComponentTool click');
 
-        } else {
-            state.active = true;
-            state.startX = x;
-            state.startY = y;
+        state.placed++;
 
-            if (App.unplacedComponent.drawNodes === 1) {
-                App.unplacedComponent.place();
-            }
+        if (App.unplacedComponent.drawNodes === state.placed) {
+            App.unplacedComponent.place();
+            state.placed = 0;
+
+              // TODO: Do we really want global state?
+            var component = ComponentTool.getComponent(state);
+            App.unplacedComponent = new component({
+                id: -1,
+                subtype: state.subtype,
+                startX: x,
+                startY: y,
+                endX: x,
+                endY: y,
+                placed: false
+            });
         }
     }
 
+    ComponentTool.contextmenu = function(state, x, y) {
+        console.log('Tool.ComponentTool contextmenu');
+
+        // Right clicking will cancel wire placement
+        state.placed = 0;
+    }
+
     ComponentTool.draw = function(state, context, x, y) {
-        if (state.active) {
-            // Draw the wire
-            //app.unplacedComponent.setEndXY(app.mouse.x, app.mouse.y);
-        } else {
-            //context.strokeStyle = 'white';
-            //context.fillStyle = 'white';
-            //context.lineWidth = 2;
-            //App.drawWireEndpoint(context, x, y);
-            App.unplacedComponent.setXY(state.placed, x, y);
-        }
+        App.unplacedComponent.setXY(state.placed, x, y);
     }
 
     App.registerTool('Component', ComponentTool);

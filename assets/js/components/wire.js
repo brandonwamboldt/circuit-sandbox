@@ -92,7 +92,7 @@
         }
 
         // Important this goes first lol
-        this.unplacedComponent = null;
+        App.unplacedComponent = null;
 
         var startCompId = null, endCompId = null;
 

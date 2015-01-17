@@ -42,7 +42,11 @@
     ComponentTool.click = function(state, x, y) {
         console.log('Tool.ComponentTool click');
 
-        state.placed++;
+        if (App.unplacedComponent.valid) {
+            state.placed++;
+        } else {
+            state.placed = 0;
+        }
 
         if (App.unplacedComponent.drawNodes === state.placed) {
             App.unplacedComponent.place();

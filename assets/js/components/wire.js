@@ -226,7 +226,7 @@
     }
 
     Wire.prototype.draw = function(partialDraw, pdX, pdY) {
-        console.log('Wire.draw called (component id#%s, dirty: %d)', this.id, this.dirty);
+        //console.log('Wire.draw called (component id#%s, dirty: %d)', this.id, this.dirty);
 
         // Defaults
         partialDraw = partialDraw || false;

@@ -292,6 +292,7 @@
 
     // Load external components
     app.loadModules([
+        '/Components/Ground',
         '/Components/PowerSource',
         '/Components/Transistor',
         '/Components/Wire',

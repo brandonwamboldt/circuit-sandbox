@@ -20,9 +20,7 @@
     $('#tool-add-ground-node').on('click', function(e) {
         e.preventDefault();
 
-        App.lastTool = App.tool;
-        App.tool = 'builtin.add-ground-node';
-        App.toolState = {valid: true};
+        App.switchTool('Component', { type: App.TYPE_GROUND });
     });
 
     $('#tool-add-input-wire').on('click', function(e) {

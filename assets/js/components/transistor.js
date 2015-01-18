@@ -14,6 +14,7 @@
             collector: {
                 connected_to: [],
                 power_sources: [],
+                ground_sources: [],
                 label: 'Collector',
                 x: 0,
                 y: 0
@@ -21,6 +22,7 @@
             emitter: {
                 connected_to: [],
                 power_sources: [],
+                ground_sources: [],
                 label: 'Emitter',
                 x: 0,
                 y: 0
@@ -28,6 +30,7 @@
             base: {
                 connected_to: [],
                 power_sources: [],
+                ground_sources: [],
                 label: 'Base',
                 x: 0,
                 y: 0
@@ -86,6 +89,45 @@
                         App.components[pin.connected_to[idx]].isReceivingPower(transistorIsOn, pin.x, pin.y, this.id, this.id);
                     }
                 }
+            }
+        }
+    }
+
+    Transistor.prototype.isReceivingGround = function(receivingGround, x, y, sourceId, notifiedBy) {
+        var pin, pinId;
+
+        for (pinId in this.pins) {
+            pin = this.pins[pinId];
+
+            if (x === pin.x && y === pin.y) {
+                var index = pin.ground_sources.indexOf(sourceId);
+                var changed = false;
+
+                if (receivingGround && index === -1) {
+                    pin.ground_sources.push(sourceId);
+                    changed = true;
+                } else if (!receivingGround && index !== -1) {
+                    pin.ground_sources.splice(index, 1);
+                    changed = true;
+                }
+
+                if (changed) {
+                    if (pinId === 'emitter') {
+                        pin = this.pins.collector;
+                    } else {
+                        pin = this.pins.emitter;
+                    }
+
+                    for (idx in pin.connected_to) {
+                        if (pin.connected_to[idx] !== undefined) {
+                            App.components[pin.connected_to[idx]].isReceivingGround(receivingGround, pin.x, pin.y, sourceId, this.id);
+                        }
+                    }
+
+                    App.dirty.component = true;
+                }
+
+                break;
             }
         }
     }

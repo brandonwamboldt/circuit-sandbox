@@ -18,6 +18,7 @@
             start: {
                 connected_to: [],
                 power_sources: [],
+                ground_sources: [],
                 label: 'Start',
                 x: 0,
                 y: 0
@@ -25,6 +26,7 @@
             end: {
                 connected_to: [],
                 power_sources: [],
+                ground_sources: [],
                 label: 'End',
                 x: 0,
                 y: 0
@@ -64,6 +66,35 @@
         }
     }
 
+    Wire.prototype.isReceivingGround = function(receivingGround, x, y, sourceId, notifiedBy) {
+        var pin;
+
+        for (pin in this.pins) {
+            pin = this.pins[pin];
+
+            var index = pin.ground_sources.indexOf(sourceId);
+            var changed = false;
+
+            if (receivingGround && index === -1) {
+                pin.ground_sources.push(sourceId);
+                changed = true;
+            } else if (!receivingGround && index !== -1) {
+                pin.ground_sources.splice(index, 1);
+                changed = true;
+            }
+
+            if (changed) {
+                for (idx in pin.connected_to) {
+                    if (pin.connected_to[idx] !== notifiedBy && pin.connected_to[idx] !== undefined) {
+                        App.components[pin.connected_to[idx]].isReceivingGround(receivingGround, pin.x, pin.y, sourceId, this.id);
+                    }
+                }
+
+                App.dirty.component = true;
+            }
+        }
+    }
+
     Wire.prototype.connectTo = function(componentId, x, y, notifiedBy) {
         //console.log('Wire.connectTo called, connecting ' + this.id + ' to ' + componentId)
 
@@ -77,6 +108,7 @@
         this.pins['pin_' + x + '_' + y] = {
             connected_to: [componentId],
             power_sources: [],
+            ground_sources: [],
             label: 'Pin ' + x + 'x' + y,
             x: x,
             y: y
@@ -472,11 +504,24 @@
             subtype = 'output';
         }
 
+        var powered = false;
+        var grounded = false;
+
         // Wires should draw as powered if any pin has power
         for (pin in this.pins) {
             if (this.pins[pin].power_sources.length > 0) {
-                color = '#0cff00';
+                powered = true;
             }
+
+            if (this.pins[pin].ground_sources.length > 0) {
+                grounded = true;
+            }
+        }
+
+        if (grounded && powered) {
+            color = '#ffa200';
+        } else if (powered) {
+            color = '#0cff00';
         }
 
         // Styles that applies to wires AND wire endpoints

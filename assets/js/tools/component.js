@@ -14,6 +14,8 @@
             return App.Component.PowerSource;
         } else if (state.type === App.TYPE_TRANSISTOR) {
             return App.Component.Transistor;
+        } else if (state.type === App.TYPE_GROUND) {
+            return App.Component.Ground;
         }
     }
 

@@ -14,6 +14,7 @@
             output: {
                 connected_to: [],
                 powered: false,
+                ground_sources: [],
                 label: 'Power Output',
                 x: 0,
                 y: 0
@@ -44,6 +45,29 @@
                     }
                 }
 
+                App.dirty.component = true;
+            }
+        }
+    }
+
+    PowerSource.prototype.isReceivingGround = function(receivingGround, x, y, sourceId, notifiedBy) {
+        var pin;
+
+        for (pin in this.pins) {
+            pin = this.pins[pin];
+
+            var index = pin.ground_sources.indexOf(sourceId);
+            var changed = false;
+
+            if (receivingGround && index === -1) {
+                pin.ground_sources.push(sourceId);
+                changed = true;
+            } else if (!receivingGround && index !== -1) {
+                pin.ground_sources.splice(index, 1);
+                changed = true;
+            }
+
+            if (changed) {
                 App.dirty.component = true;
             }
         }
@@ -176,7 +200,9 @@
             color = 'red';
         }
 
-        if (this.pins.output.powered) {
+        if (this.pins.output.powered && this.pins.output.ground_sources.length > 0) {
+            color = '#ffa200';
+        } else if (this.pins.output.powered) {
             color = '#0cff00';
         }
 

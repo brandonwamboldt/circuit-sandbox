@@ -4,7 +4,7 @@
     }
 
     ComponentTool.label = function(state) {
-        return 'Component.' + state.type;
+        return 'Component (' + state.type + ')';
     }
 
     ComponentTool.getComponent = function(state) {

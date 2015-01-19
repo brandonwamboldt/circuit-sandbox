@@ -83,6 +83,9 @@
         // Activate new tool
         Tool[newTool].activate(toolState, options);
         app.tool = newTool;
+
+        // Dirty the canvas
+        app.dirty.main = true;
     }
 
     //

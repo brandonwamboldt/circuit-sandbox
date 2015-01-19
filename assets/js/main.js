@@ -35,7 +35,7 @@
     app.zoom = 1;
     app.snap = 20;
     app.actualSnap = 20;
-    app.mouse = {x: 0, y: 0, draw: true}
+    app.mouse = {x: 0, y: 0, draw: false}
     app.input = 'A';
 
     // Tooling
